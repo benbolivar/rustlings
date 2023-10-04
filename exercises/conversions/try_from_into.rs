@@ -27,8 +27,6 @@ enum IntoColorError {
     IntConversion,
 }
 
-// I AM NOT DONE
-
 // Your task is to complete this implementation and return an Ok result of inner
 // type Color. You need to create an implementation for a tuple of three
 // integers, an array of three integers, and a slice of integers.
@@ -41,6 +39,16 @@ enum IntoColorError {
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
     fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let is_invalid_color = |element: i16| element < 0 || element > 255;
+        if is_invalid_color(tuple.0) || is_invalid_color(tuple.1) || is_invalid_color(tuple.2) {
+            return Err(Self::Error::IntConversion);
+        } else {
+            return Ok(Color {
+                red: tuple.0 as u8,
+                green: tuple.1 as u8,
+                blue: tuple.2 as u8,
+            });
+        }
     }
 }
 
@@ -48,6 +56,16 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        let is_invalid_color = |element: i16| element < 0 || element > 255;
+        if is_invalid_color(arr[0]) || is_invalid_color(arr[1]) || is_invalid_color(arr[2]) {
+            return Err(Self::Error::IntConversion);
+        } else {
+            return Ok(Color {
+                red: arr[0] as u8,
+                green: arr[1] as u8,
+                blue: arr[2] as u8,
+            });
+        }
     }
 }
 
@@ -55,6 +73,21 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        let is_invalid_color = |element: i16| element < 0 || element > 255;
+        if slice.len() != 3 {
+            return Err(Self::Error::BadLen);
+        } else if is_invalid_color(slice[0])
+            || is_invalid_color(slice[1])
+            || is_invalid_color(slice[2])
+        {
+            return Err(Self::Error::IntConversion);
+        } else {
+            return Ok(Color {
+                red: slice[0] as u8,
+                green: slice[1] as u8,
+                blue: slice[2] as u8,
+            });
+        }
     }
 }
 

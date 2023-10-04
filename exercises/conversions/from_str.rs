@@ -9,6 +9,9 @@
 // Execute `rustlings hint from_str` or use the `hint` watch subcommand for a
 // hint.
 
+use std::error::Error;
+use std::fmt;
+use std::fmt::{Display, Formatter};
 use std::num::ParseIntError;
 use std::str::FromStr;
 
@@ -31,7 +34,12 @@ enum ParsePersonError {
     ParseInt(ParseIntError),
 }
 
-// I AM NOT DONE
+impl Error for ParsePersonError {}
+impl Display for ParsePersonError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "ParsePersonError")
+    }
+}
 
 // Steps:
 // 1. If the length of the provided string is 0, an error should be returned
@@ -52,6 +60,25 @@ enum ParsePersonError {
 impl FromStr for Person {
     type Err = ParsePersonError;
     fn from_str(s: &str) -> Result<Person, Self::Err> {
+        let fields: Vec<&str> = s.split(',').collect();
+        if s.len() < 1 {
+            return Err(ParsePersonError::Empty);
+        } else if fields.len() != 2 {
+            return Err(ParsePersonError::BadLen);
+        } else if fields[0].len() < 1 {
+            return Err(ParsePersonError::NoName);
+        };
+
+        let age = fields[1]
+            .parse::<usize>()
+            .map_err(|e| ParsePersonError::ParseInt(e))?;
+
+        let ret_val = Person {
+            name: fields[0].to_string(),
+            age,
+        };
+        println!("{ret_val:?}");
+        Ok(ret_val)
     }
 }
 
