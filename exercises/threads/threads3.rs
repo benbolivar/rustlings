@@ -4,7 +4,7 @@
 // hint.
 
 use std::sync::mpsc;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
@@ -25,28 +25,26 @@ impl Queue {
 }
 
 fn send_tx(q: Queue, tx: mpsc::Sender<u32>) -> () {
-    let tc = Arc::new(tx);
+    let tc = Arc::new(Mutex::new(tx));
     let tc1 = Arc::clone(&tc);
     let tc2 = Arc::clone(&tc);
 
-    let qc = Arc::new(q);
+    let qc = Arc::new(Mutex::new(q));
     let qc1 = Arc::clone(&qc);
     let qc2 = Arc::clone(&qc);
 
     thread::spawn(move || {
-        for val in &qc1.first_half {
+        for val in &qc1.lock().unwrap().first_half {
             println!("sending {:?}", val);
-            //tx.send(*val).unwrap();
-            tc1.send(*val).unwrap();
+            tc1.lock().unwrap().send(*val).unwrap();
             thread::sleep(Duration::from_secs(1));
         }
     });
 
     thread::spawn(move || {
-        for val in &qc2.second_half {
+        for val in &qc2.lock().unwrap().second_half {
             println!("sending {:?}", val);
-            //tx.send(*val).unwrap();
-            tc2.send(*val).unwrap();
+            tc2.lock().unwrap().send(*val).unwrap();
             thread::sleep(Duration::from_secs(1));
         }
     });
